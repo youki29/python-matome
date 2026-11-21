@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pythonまとめ｜配列・二重ループ・関数</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Zen+Old+Mincho:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F5F7FA; --sheet:#FFFFFF; --ink:#1F2A44; --sub:#56627A; --rule:#D6DCE6;
+  --marker:#FFE45C; --pink:#FFB3CF; --red:#D2283C; --redsheet:#E0404F; --navy:#2B3F7A;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#131825; --sheet:#1B2232; --ink:#E7EBF3; --sub:#A3ADC2; --rule:#323C52;
+    --marker:#6B5A12; --pink:#6B2A44; --red:#FF6B7A; --redsheet:#B8303E; --navy:#9DB2F0;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#131825; --sheet:#1B2232; --ink:#E7EBF3; --sub:#A3ADC2; --rule:#323C52;
+  --marker:#6B5A12; --pink:#6B2A44; --red:#FF6B7A; --redsheet:#B8303E; --navy:#9DB2F0;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px)}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.85;-webkit-text-size-adjust:100%}
+h1,h2,h3{font-family:"Zen Old Mincho","Hiragino Mincho ProN","Yu Mincho",serif;line-height:1.35;margin:0}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--navy);outline-offset:2px;border-radius:4px}
+
+/* header */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--sheet);border-bottom:1px solid var(--rule)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--sheet)}
+.bar{max-width:880px;margin:0 auto;display:flex;align-items:center;gap:8px;padding:8px 16px}
+.brand{font-family:"Zen Old Mincho",serif;font-weight:900;font-size:1.05rem;margin-right:auto;white-space:nowrap}
+nav.tabs{max-width:880px;margin:0 auto;display:flex;gap:4px;padding:0 12px;overflow-x:auto}
+nav.tabs a{flex:1 0 auto;text-align:center;padding:10px 14px;text-decoration:none;color:var(--sub);font-weight:700;border-bottom:3px solid transparent}
+nav.tabs a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--red)}
+.iconbtn{border:1px solid var(--rule);background:transparent;border-radius:999px;padding:4px 12px;font-size:.85rem;cursor:pointer}
+
+main{max-width:880px;margin:0 auto;padding:24px 16px 80px}
+.view{display:none}.view.on{display:block}
+
+/* hero */
+.hero{padding:12px 0 24px}
+.hero h1{font-size:clamp(1.9rem,6vw,2.8rem);font-weight:900;letter-spacing:.02em}
+.hero h1 .yr{display:block;font-size:.5em;color:var(--sub);font-weight:700;letter-spacing:.1em}
+.hero p{color:var(--sub);max-width:36em;margin:.8em 0 0}
+
+/* red sheet */
+mark{background:linear-gradient(transparent 45%,var(--marker) 45%);color:inherit;padding:0 .1em;border-radius:2px}
+mark.p{background:linear-gradient(transparent 45%,var(--pink) 45%)}
+body.sheet mark{background:var(--redsheet);color:transparent;cursor:pointer;user-select:none}
+body.sheet mark.open{background:linear-gradient(transparent 45%,var(--marker) 45%);color:var(--red);font-weight:700}
+.sheetbtn[aria-pressed="true"]{background:var(--redsheet);color:#fff;border-color:var(--redsheet)}
+
+/* chapters */
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 28px;padding:0;list-style:none}
+.toc a{display:block;padding:6px 12px;border:1px solid var(--rule);border-radius:6px;text-decoration:none;color:var(--ink);font-size:.9rem;background:var(--sheet)}
+section.ch{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:24px 20px;margin-bottom:28px}
+section.ch > h2{font-size:1.5rem;font-weight:900}
+.pg{color:var(--sub);font-size:.85rem;margin:.2em 0 1em}
+.q{border-left:4px solid var(--red);padding:2px 0 2px 12px;margin:0 0 1.2em;font-weight:700}
+section.ch h3{font-size:1.1rem;margin:1.6em 0 .5em;padding-bottom:4px;border-bottom:1px dashed var(--rule)}
+section.ch ul{padding-left:1.2em;margin:.4em 0}
+section.ch li{margin:.25em 0}
+.box{border:1px solid var(--rule);border-radius:8px;padding:12px 14px;margin:1em 0;background:var(--paper)}
+.box b{color:var(--navy)}
+.sum{border:2px solid var(--ink);border-radius:8px;padding:14px 16px;margin-top:1.4em}
+.sum strong{font-family:"Zen Old Mincho",serif}
+table{border-collapse:collapse;width:100%;font-size:.95rem}
+.tw{overflow-x:auto}
+td,th{border:1px solid var(--rule);padding:6px 8px;text-align:left;vertical-align:top}
+th{background:var(--paper);white-space:nowrap}
+
+/* timeline */
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 20px}
+.chip{border:1px solid var(--rule);background:var(--sheet);border-radius:999px;padding:4px 12px;font-size:.88rem;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+ol.tl{list-style:none;margin:0;padding:0;position:relative}
+ol.tl::before{content:"";position:absolute;left:62px;top:6px;bottom:6px;width:2px;background:var(--rule)}
+.tl li{display:grid;grid-template-columns:56px 1fr;gap:18px;padding:8px 0;position:relative}
+.tl .y{font-family:"Zen Old Mincho",serif;font-weight:900;font-size:1.1rem;text-align:right}
+.tl li::after{content:"";position:absolute;left:57px;top:17px;width:12px;height:12px;border-radius:50%;background:var(--sheet);border:3px solid var(--c,var(--ink))}
+.tl .ev{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:8px 12px}
+.tl .tag{display:inline-block;font-size:.75rem;padding:0 8px;border-radius:999px;color:#fff;background:var(--c);margin-right:6px;vertical-align:2px}
+.tl .ev small{display:block;color:var(--sub);font-size:.85rem;line-height:1.6;margin-top:2px}
+.tl li.big .ev{border:2px solid var(--red)}
+
+/* cloze */
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px}
+select{font:inherit;color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:6px 8px}
+.btn{border:1px solid var(--ink);background:var(--sheet);border-radius:6px;padding:6px 14px;cursor:pointer;font-weight:700}
+.btn.main{background:var(--ink);color:var(--paper)}
+ol.cloze{padding-left:1.6em;margin:0}
+ol.cloze li{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:10px 14px;margin:0 0 10px}
+.blank{display:inline-block;min-width:5em;border:none;border-bottom:2px solid var(--red);background:transparent;color:transparent;cursor:pointer;padding:0 .3em;margin:0 .15em;line-height:1.4;text-align:center}
+.blank.open{color:var(--red);font-weight:700}
+.chlabel{display:block;font-size:.78rem;color:var(--sub)}
+
+/* qa */
+.card{background:var(--sheet);border:1px solid var(--rule);border-radius:12px;padding:24px 20px;min-height:220px;display:flex;flex-direction:column}
+.card .meta{display:flex;justify-content:space-between;color:var(--sub);font-size:.85rem}
+.card .qq{font-size:1.2rem;font-weight:700;margin:18px 0;flex:1}
+.card .ans{font-family:"Zen Old Mincho",serif;font-size:1.5rem;font-weight:900;color:var(--red);min-height:1.6em;margin-bottom:16px}
+.card .ans small{display:block;font-family:"Zen Kaku Gothic New",sans-serif;font-size:.9rem;font-weight:400;color:var(--sub)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row .btn{flex:1;min-height:44px}
+.progress{height:6px;background:var(--rule);border-radius:3px;margin:16px 0 6px;overflow:hidden}
+.progress span{display:block;height:100%;background:var(--red);width:0;transition:width .3s}
+.stat{color:var(--sub);font-size:.88rem}
+.empty{text-align:center;padding:40px 0;color:var(--sub)}
+
+footer{text-align:center;color:var(--sub);font-size:.8rem;padding:24px 16px 40px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (max-width:520px){
+  section.ch{padding:18px 14px}
+  ol.tl::before{left:46px}
+  .tl li{grid-template-columns:42px 1fr;gap:16px}
+  .tl li::after{left:41px}
+  .tl .y{font-size:.95rem}
+}
+pre.code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9rem;line-height:1.6;background:var(--paper);border:1px solid var(--rule);border-left:4px solid var(--navy);border-radius:6px;padding:10px 12px;margin:.8em 0;overflow-x:auto;white-space:pre;tab-size:4}
+pre.code .cm{color:var(--sub)}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92em;background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:0 .3em}
+#tlFilters,#tl{display:none}
+.pcard{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;margin:0 0 14px}
+.pcard h3{font-family:"Zen Kaku Gothic New",sans-serif;font-size:1rem;margin:0 0 4px}
+.pcard .lbl{font-size:.8rem;color:var(--sub)}
+.pcard .out{border-left-color:var(--red);color:var(--red);font-weight:700}
+.pcard .hint{font-size:.88rem;color:var(--sub);margin:.4em 0 0}
+.pcard .exp{font-size:.92rem;margin:.4em 0 0}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="bar">
+    <span class="brand">Pythonまとめ</span>
+    <button class="iconbtn sheetbtn" id="sheetBtn" aria-pressed="false" title="重要語句を赤シートで隠す">赤シート</button>
+  </div>
+  <nav class="tabs" aria-label="ページ切り替え">
+    <a href="#summary">まとめ</a>
+    <a href="#timeline">出力予想</a>
+    <a href="#cloze">穴埋め</a>
+    <a href="#qa">一問一答</a>
+  </nav>
+</header>
+
+<main>
+  <!-- ===== まとめ ===== -->
+  <div class="view" id="v-summary">
+    <div class="hero">
+      <h1><span class="yr">PYTHON</span>配列・二重ループ・関数</h1>
+      <p>情報Ⅰのプログラミング（実問07〜10）と、モデル化とシミュレーション（Python編）をまとめた自習用ページです。「出力予想」タブでは、コードを読んで何が表示されるかを考える練習ができます。</p>
+    </div>
+    <ul class="toc">
+      <li><a href="#ch-array">二次元配列</a></li>
+      <li><a href="#ch-print">printの改行とスペース</a></li>
+      <li><a href="#ch-loop">二重ループ</a></li>
+      <li><a href="#ch-input">input関数</a></li>
+      <li><a href="#ch-func">ユーザ定義関数</a></li>
+      <li><a href="#ch-scope">変数の有効範囲</a></li>
+      <li><a href="#ch-sim">PK戦のシミュレーション</a></li>
+    </ul>
+
+    <section class="ch" id="ch-array">
+      <h2>二次元配列（リスト）</h2>
+      <p class="pg">実問07 配列②</p>
+      <ul>
+        <li>要素を<mark>1つの添字</mark>で指定する配列＝<mark>一次元配列</mark></li>
+        <li>要素を<mark>2つの添字</mark>で指定する配列＝<mark>二次元配列</mark></li>
+        <li>添字は<mark>0</mark>から数える。<code>a[行][列]</code> の順に書く</li>
+      </ul>
+<pre class="code">a = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+print(a[0][2])   <span class="cm"># 0行目・2列目 → 3</span>
+print(a[2][0])   <span class="cm"># 2行目・0列目 → 7</span>
+print(a[1])      <span class="cm"># 1行目まるごと → [4, 5, 6]</span></pre>
+      <div class="tw"><table>
+        <tr><th>添字</th><th>列0</th><th>列1</th><th>列2</th></tr>
+        <tr><th>行0</th><td>a[0][0]＝1</td><td>a[0][1]＝2</td><td>a[0][2]＝3</td></tr>
+        <tr><th>行1</th><td>a[1][0]＝4</td><td>a[1][1]＝5</td><td>a[1][2]＝6</td></tr>
+        <tr><th>行2</th><td>a[2][0]＝7</td><td>a[2][1]＝8</td><td>a[2][2]＝9</td></tr>
+      </table></div>
+      <div class="box"><b>使い方の例</b><br>3人が3回の小テストを受けた点数を <code>tokuten</code> に入れると、<mark>行＝人</mark>（Aさん〜Cさん）、<mark>列＝回</mark>（1回目〜3回目）。Bさんの3回目は <code>tokuten[1][2]</code>（1行目・2列目）。「2人目」「3回目」は添字では1と2になることに注意。</div>
+    </section>
+
+    <section class="ch" id="ch-print">
+      <h2>printの改行とスペース</h2>
+      <p class="pg">実問08 二重ループの前に</p>
+      <ul>
+        <li><code>print()</code> はふつう、表示のあとに<mark>改行</mark>する</li>
+        <li><code>print(1, end="")</code> → <mark>改行しない</mark>（すき間なしで続ける）</li>
+        <li><code>print(1, end=" ")</code> → 改行せず、<mark>スペースを空けて</mark>続ける</li>
+        <li><code>print("")</code> → 何も表示せず<mark>改行だけ</mark>する</li>
+        <li><code>print("My name is", a, ".")</code> のように、<mark>「,」で区切る</mark>と文字列と変数を一緒に表示できる（間にスペースが入る）</li>
+      </ul>
+<pre class="code">print(1, end=" ")
+print(2, end=" ")
+print("")
+print(3)</pre>
+      <p>表示は「1 2」のあと改行して「3」。</p>
+    </section>
+
+    <section class="ch" id="ch-loop">
+      <h2>二重ループ</h2>
+      <p class="pg">実問08 二重ループ</p>
+      <ul>
+        <li>for文の中にfor文を入れたもの。<code>i</code> のfor文が<mark>外側ループ</mark>、<code>j</code> のfor文が<mark>内側ループ</mark></li>
+        <li>ルール：<mark>外側のループが1回まわるごとに、内側のループが全部まわる</mark></li>
+        <li>内側のループは、1周終わると最初の値に<mark>リセット</mark>される</li>
+        <li><code>range(1, 3, 1)</code> は 1 から始めて 1 ずつ増やし、<mark>3の手前</mark>（2）まで</li>
+        <li>3重以上もできるが、読みにくくなるのであまり使わない</li>
+      </ul>
+<pre class="code">for i in range(1, 3, 1):
+    for j in range(0, 60, 1):
+        print(i, ":", j)</pre>
+      <p>時計のように 1 : 0 → 1 : 1 → … → 1 : 59 → 2 : 0 → … → 2 : 59 と表示される。</p>
+
+      <h3>九九の表</h3>
+      <p>かけ算を <code>i * j</code> とし、<code>i</code> を外側（段）、<code>j</code> を内側にする。</p>
+<pre class="code">for i in range(1, 10, 1):
+    for j in range(1, 10, 1):
+        ans = i * j
+        print(ans, end=" ")   <span class="cm"># 段を横に並べる</span>
+    print("")                 <span class="cm"># 1段終わるごとに改行</span></pre>
+      <div class="box"><b>インデントの位置に注意</b><br><code>print("")</code> は<mark>内側のforと同じ深さ</mark>に書く。内側ループの中に入れると毎回改行され、外に出しすぎると最後に1回しか改行されない。</div>
+
+      <h3>二次元配列を二重ループで表示</h3>
+<pre class="code">a = [
+    [1, 2, 3, 4, 5],
+    [6, 7, 8, 9, 10],
+    [11, 12, 13, 14, 15]
+]
+for i in range(0, 3, 1):        <span class="cm"># 行（0〜2）</span>
+    for j in range(0, 5, 1):    <span class="cm"># 列（0〜4）</span>
+        print(a[i][j], end=" ")
+    print("")</pre>
+      <p>行に <code>i</code>、列に <code>j</code> を当てはめるのがコツ。配列の添字が0から始まるので、<code>range</code> も0から始める。</p>
+    </section>
+
+    <section class="ch" id="ch-input">
+      <h2>input関数</h2>
+      <p class="pg">実問09 inputと関数</p>
+      <ul>
+        <li><code>input()</code>：キーボードから入力した値を変数に入れる。そのままだと<mark>文字列</mark>になる</li>
+        <li>整数として使う：<code>int(input())</code>（int＝<mark>integer</mark>、整数）</li>
+        <li>小数として使う：<code>float(input())</code>（float＝<mark>浮動小数点数</mark>）</li>
+      </ul>
+<pre class="code">a = input("What is your name? ")
+print("My name is", a, ".")
+
+teihen = float(input("底辺 "))
+takasa = float(input("高さ "))
+menseki = teihen * takasa / 2
+print("面積は", menseki, "です")</pre>
+    </section>
+
+    <section class="ch" id="ch-func">
+      <h2>ユーザ定義関数</h2>
+      <p class="pg">実問09・10 関数</p>
+      <ul>
+        <li><mark>関数</mark>：決まった一連の処理をまとめたもの。呼び出すとその処理が実行される</li>
+        <li>print や input のように最初から用意された関数＝<mark>組み込み関数</mark></li>
+        <li>自分で作る関数＝<mark>ユーザ定義関数</mark>。<code>def</code> で定義し、<code>return</code> で結果を返す</li>
+        <li>関数の定義は、<mark>関数を使う前に書いておく</mark></li>
+      </ul>
+<pre class="code">def keisan(x, y):     <span class="cm"># x, y が仮引数</span>
+    z = x + y
+    return z          <span class="cm"># z が戻り値</span>
+
+a = int(input())
+b = int(input())
+c = keisan(a, b)      <span class="cm"># a, b が実引数</span>
+print(c)</pre>
+      <div class="tw"><table>
+        <tr><th>用語</th><th>意味</th><th>上の例</th></tr>
+        <tr><td><mark>引数</mark></td><td>関数に渡す値</td><td></td></tr>
+        <tr><td><mark>仮引数</mark></td><td>関数の定義側（def の行）で受け取る引数</td><td>x, y</td></tr>
+        <tr><td><mark>実引数</mark></td><td>呼び出す側で渡す引数</td><td>a, b</td></tr>
+        <tr><td><mark>戻り値</mark>（返り値）</td><td>関数の結果として呼び出し側に返す値</td><td>z</td></tr>
+      </table></div>
+      <h3>問題：三角形の面積を求める関数</h3>
+<pre class="code">def area(x, y):
+    z = x * y / 2
+    return z
+
+a = float(input("底辺 "))
+b = float(input("高さ "))
+c = area(a, b)
+print("面積は", c)</pre>
+    </section>
+
+    <section class="ch" id="ch-scope">
+      <h2>変数の有効範囲</h2>
+      <p class="pg">実問10 関数②</p>
+      <ul>
+        <li>Pythonでは、変数に最初に値を代入した時点で、その変数が宣言される</li>
+        <li>関数の<mark>外側</mark>で宣言した変数＝<mark>グローバル変数</mark>。プログラム全体で有効</li>
+        <li>関数の<mark>内側</mark>で宣言した変数（仮引数も含む）＝<mark>ローカル変数</mark>。関数の内側だけで有効</li>
+        <li>関数は<mark>呼び出されるまで実行されない</mark>。def の部分は飛ばして、外側の最初の行から読む</li>
+      </ul>
+<pre class="code">def test(x):
+    print(x)      <span class="cm"># ① 4（仮引数に4が渡される）</span>
+    x = 6
+    print(x)      <span class="cm"># ② 6（関数内のローカル変数）</span>
+
+x = 2
+test(4)
+print(x)          <span class="cm"># ③ 2（グローバル変数は変わらない）</span></pre>
+      <p>関数の中で同じ名前の x を変えても、外側の x（グローバル変数）には影響しない。</p>
+    </section>
+
+    <section class="ch" id="ch-sim">
+      <h2>PK戦のシミュレーション</h2>
+      <p class="pg">教26 モデル化とシミュレーション（Python編）</p>
+      <p class="q">サッカーのPK戦は、先攻と後攻のどちらが有利だろう？</p>
+      <ul>
+        <li>ルール：先攻・後攻が100本ずつ蹴る。先攻の成功率は80%</li>
+        <li>後攻は、先攻が成功したら<mark>−5%</mark>（75%）、失敗したら<mark>＋5%</mark>（85%）（心理的な影響）</li>
+        <li><code>import random</code> で乱数を使えるようにし、<code>random.randint(1, 100)</code> で<mark>1〜100の整数</mark>をランダムに出す</li>
+        <li>乱数が80以下なら成功＝80%の確率、と考える</li>
+      </ul>
+<pre class="code">import random
+sg = 0    <span class="cm"># 先攻の成功数</span>
+kg = 0    <span class="cm"># 後攻の成功数</span>
+for j in range(1, 101, 1):          <span class="cm"># 100回くり返す</span>
+    senkou = random.randint(1, 100)
+    koukou = random.randint(1, 100)
+    if senkou &lt;= 80:                 <span class="cm"># 先攻が成功</span>
+        sg = sg + 1
+        if koukou &lt;= 75:             <span class="cm"># 後攻は75%</span>
+            kg = kg + 1
+    else:                            <span class="cm"># 先攻が失敗</span>
+        if koukou &lt;= 85:             <span class="cm"># 後攻は85%</span>
+            kg = kg + 1
+print("先攻は", sg, "回PKに成功しました")
+print("後攻は", kg, "回PKに成功しました")</pre>
+      <ul>
+        <li>試行回数を増やすには、全体をさらに <code>for i in range(1, 11, 1):</code> で囲み、中の行に同じだけインデントを入れる（二重ループ）</li>
+        <li>確認用の <code>print(1)</code> などを消すときは、if の中が空にならないように注意（空だとエラー）</li>
+      </ul>
+      <div class="sum"><strong>結論</strong><br>後攻の成功率は 0.8×75% ＋ 0.2×85% ＝ <mark>77%</mark> で、先攻の80%より低い。試行回数を増やすほど、<mark>先攻</mark>の方が有利という結果に近づく。</div>
+    </section>
+  </div>
+
+  <!-- ===== 出力予想 ===== -->
+  <div class="view" id="v-timeline">
+    <div class="hero"><h1><span class="yr">PREDICT THE OUTPUT</span>出力予想</h1>
+      <p>コードを読んで、何が表示されるかを考えてから「答えを見る」を押します。</p></div>
+    <div class="tools">
+      <button class="btn" id="pShow">全部見る</button>
+      <button class="btn" id="pHide">全部隠す</button>
+    </div>
+    <div id="predict"></div>
+    <div class="filters" id="tlFilters"></div>
+    <ol class="tl" id="tl"></ol>
+  </div>
+
+  <!-- ===== 穴埋め ===== -->
+  <div class="view" id="v-cloze">
+    <div class="hero"><h1><span class="yr">FILL IN THE BLANKS</span>穴埋め問題</h1>
+      <p>赤い下線をタップすると答えが出ます。もう一度タップで隠れます。</p></div>
+    <div class="tools">
+      <select id="clozeCh" aria-label="単元を選ぶ"></select>
+      <button class="btn" id="clozeShow">全部見る</button>
+      <button class="btn" id="clozeHide">全部隠す</button>
+      <button class="btn" id="clozeShuffle">シャッフル</button>
+    </div>
+    <ol class="cloze" id="clozeList"></ol>
+  </div>
+
+  <!-- ===== 一問一答 ===== -->
+  <div class="view" id="v-qa">
+    <div class="hero"><h1><span class="yr">Q &amp; A</span>一問一答</h1>
+      <p>答えを確認したら「覚えた」か「もう一回」を選びます。「覚えた」の記録はこのブラウザに保存されます。</p></div>
+    <div class="tools">
+      <select id="qaCh" aria-label="単元を選ぶ"></select>
+      <select id="qaMode" aria-label="出題範囲">
+        <option value="todo">まだ覚えていない問題だけ</option>
+        <option value="all">すべての問題</option>
+      </select>
+      <button class="btn" id="qaReset">記録をリセット</button>
+    </div>
+    <div id="qaBox"></div>
+    <div class="progress"><span id="qaBar"></span></div>
+    <div class="stat" id="qaStat"></div>
+  </div>
+</main>
+<footer>情報Ⅰ プログラミング教材（実問07〜10・教26）をもとに作成した自習用まとめ</footer>
+
+<script>
+const CH = {
+  array:"配列とprint",
+  loop:"二重ループ",
+  func:"input・関数・有効範囲",
+  sim:"シミュレーション"
+};
+const REG = {}; const TL = [];
+
+/* ---------- 出力予想データ [タイトル, コード, 出力, 解説] ---------- */
+const PREDICT = [
+  ["二重ループの基本","for i in range(1, 3, 1):\n    for j in range(4, 6, 1):\n        print(i, j)","1 4\n1 5\n2 4\n2 5","i=1 のとき j が 4,5 と全部まわり、次に i=2 で j がリセットされて 4,5。"],
+  ["配列の添字を二重ループで","list1 = [1, 2]\nlist2 = [4, 5]\nfor i in range(0, 2, 1):\n    for j in range(0, 2, 1):\n        print(list1[i], list2[j])","1 4\n1 5\n2 4\n2 5","i と j は添字（0,1）。list1[0]=1, list1[1]=2 を外側、list2 を内側でまわす。"],
+  ["end と改行","print(1, end=\" \")\nprint(2, end=\" \")\nprint(\"\")\nprint(3)","1 2\n3","end=\" \" で改行せずスペース。print(\"\") で改行だけ入る。"],
+  ["二次元配列の要素","b = [\n    [5, 10, 15],\n    [20, 25, 30],\n    [35, 40, 45]\n]\nprint(b[1][1])\nprint(b[1])\nprint(b[2][0])","25\n[20, 25, 30]\n35","添字は0から。b[1] は2行目まるごと。b[2][0] は3行目の最初。"],
+  ["小テストの点数","tokuten = [\n    [10, 9, 8],\n    [7, 6, 7],\n    [9, 10, 8]\n]\nprint(tokuten[1][2])","7","行がBさん（添字1）、列が3回目（添字2）。"],
+  ["二次元配列をすべて表示","a = [\n    [1, 2, 3],\n    [4, 5, 6]\n]\nfor i in range(0, 2, 1):\n    for j in range(0, 3, 1):\n        print(a[i][j], end=\" \")\n    print(\"\")","1 2 3\n4 5 6","1行分を横に並べ、行が終わるたびに print(\"\") で改行。"],
+  ["小さい九九","for i in range(1, 4, 1):\n    for j in range(1, 4, 1):\n        print(i * j, end=\" \")\n    print(\"\")","1 2 3\n2 4 6\n3 6 9","i が段、j が掛ける数。range(1, 4, 1) は 1〜3。"],
+  ["ユーザ定義関数","def keisan(x, y):\n    z = x * y / 2\n    return z\n\nc = keisan(4, 3)\nprint(c)","6.0","4×3÷2＝6。/ の割り算の結果は小数（6.0）になる。"],
+  ["ローカル変数","def test():\n    x = 0\n    print(x)\n\nx = 1\ntest()\nprint(x)","0\n1","関数の中の x はローカル変数。外側の x=1 は変わらない。"],
+  ["引数とローカル変数","def test(x):\n    print(x)\n    x = 6\n    print(x)\n\nx = 2\ntest(4)\nprint(x)","4\n6\n2","仮引数 x に 4 が渡る → 関数内で 6 に変わる → 外側の x は 2 のまま。"],
+  ["printのカンマ区切り","a = \"Taro\"\nprint(\"My name is\", a, \".\")","My name is Taro .","カンマで区切ると、間にスペースが入る。"]
+];
+
+/* ---------- 穴埋めデータ（配列の角かっこは全角［］で表記） ---------- */
+const CLOZE = [
+  ["array","要素を1つの添字で指定する配列を[一次元配列]、2つの添字で指定する配列を[二次元配列]という。"],
+  ["array","配列の添字は[0]から数える。"],
+  ["array","二次元配列 a の2行目・3列目の要素は a［[1]］［[2]］と書く。"],
+  ["array","print の中で end=\"\" と書くと、表示のあとに[改行しない]。"],
+  ["array","print(1, end=\" \") と書くと、改行せずに[スペース]を空けて続ける。"],
+  ["array","何も表示せず改行だけしたいときは[print(\"\")]と書く。"],
+  ["array","print の中を[カンマ]で区切ると、文字列と変数を一緒に表示できる。"],
+  ["loop","for文の中にfor文を入れたものを[二重ループ]という。"],
+  ["loop","外側のループが1回まわるごとに、[内側]のループが全部まわる。"],
+  ["loop","内側のループは1周終わると、最初の値に[リセット]される。"],
+  ["loop","range(1, 10, 1) は 1 から [9] までの数をつくる。"],
+  ["loop","九九の表では、段を表す i を[外側]、掛ける数 j を[内側]のループにする。"],
+  ["loop","九九の段ごとに改行する print(\"\") は、[内側のfor]と同じ深さのインデントに書く。"],
+  ["func","キーボードから値を入力させるには[input]関数を使う。"],
+  ["func","入力を整数として使うには[int]、小数として使うには[float]で囲む。"],
+  ["func","print や input のように最初から用意された関数を[組み込み関数]という。"],
+  ["func","自分で作る関数を[ユーザ定義関数]といい、[def]で定義する。"],
+  ["func","関数の結果を呼び出し側に返すには[return]を使う。"],
+  ["func","関数の定義側で受け取る引数を[仮引数]、呼び出す側で渡す引数を[実引数]という。"],
+  ["func","関数が返す値を[戻り値]（返り値）という。"],
+  ["func","ユーザ定義関数の定義は、関数を[使う前]に書いておく。"],
+  ["func","関数の外側で宣言した変数を[グローバル変数]、内側で宣言した変数を[ローカル変数]という。"],
+  ["func","ローカル変数は[関数の内側]だけで有効である。"],
+  ["sim","乱数を使うには、最初に[import random]と書く。"],
+  ["sim","random.randint(1, 100) は 1 から [100] までの整数をランダムに出す。"],
+  ["sim","乱数が80以下なら成功とすると、成功の確率は[80]%になる。"],
+  ["sim","PK戦のシミュレーションでは、[先攻]の方が有利という結果になる。"]
+];
+
+/* ---------- 一問一答データ ---------- */
+const QA = [
+  ["array","要素を2つの添字で指定する配列は？","二次元配列"],
+  ["array","配列の添字はいくつから始まる？","0"],
+  ["array","二次元配列で a[1][2] の 1 と 2 はそれぞれ何を表す？","1が行、2が列","どちらも0から数える"],
+  ["array","b = [[5,10,15],[20,25,30],[35,40,45]] で 25 を表示する書き方は？","print(b[1][1])"],
+  ["array","b の2行目だけを表示する書き方は？","print(b[1])","[20, 25, 30] と表示される"],
+  ["array","改行せずに続けて表示する print の書き方は？","print(値, end=\"\")"],
+  ["array","改行だけを入れる書き方は？","print(\"\")"],
+  ["loop","二重ループの実行ルールは？","外側のループが1回まわるごとに、内側のループが全部まわる"],
+  ["loop","range(0, 60, 1) で最後に出る数は？","59"],
+  ["loop","九九の表を横に並べるために print に付けるものは？","end=\" \""],
+  ["loop","二次元配列を二重ループで表示するとき、i と j は何に当てはめる？","i を行、j を列"],
+  ["loop","3重以上のループがあまり使われない理由は？","コードが読みにくく、ややこしくなるから"],
+  ["func","input 関数で入力した値は、そのままだと何になる？","文字列"],
+  ["func","入力を整数にする関数は？","int（integer の略）"],
+  ["func","入力を小数にする関数は？","float（浮動小数点数）"],
+  ["func","あらかじめ用意されている関数は？","組み込み関数"],
+  ["func","自分で作る関数は？","ユーザ定義関数"],
+  ["func","関数を定義するときに使う言葉は？","def"],
+  ["func","def keisan(x, y): の x, y は何という？","仮引数"],
+  ["func","c = keisan(a, b) の a, b は何という？","実引数"],
+  ["func","return で返す値は何という？","戻り値（返り値）"],
+  ["func","三角形の面積を返す関数の計算式は？","z = x * y / 2"],
+  ["func","関数の外側で宣言した、プログラム全体で有効な変数は？","グローバル変数"],
+  ["func","関数の内側だけで有効な変数は？","ローカル変数"],
+  ["func","関数はいつ実行される？","呼び出されたとき"],
+  ["sim","1〜100の整数の乱数を出す書き方は？","random.randint(1, 100)"],
+  ["sim","乱数を使う前に書く1行は？","import random"],
+  ["sim","PK戦で、先攻が成功したときの後攻の成功率は？","75%"],
+  ["sim","試行回数を増やすにはどうする？","全体をさらに for 文で囲み、中の行にインデントを入れる"],
+  ["sim","PK戦のシミュレーションで有利なのは？","先攻","後攻の成功率は平均77%"]
+];
+/* ---------- ユーティリティ ---------- */
+const $ = s => document.querySelector(s);
+const store = {
+  get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+};
+const shuffle = a => {a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc = s => s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+function chOptions(sel){
+  sel.innerHTML = `<option value="all">すべての単元</option>` +
+    Object.entries(CH).map(([k,v])=>`<option value="${k}">${v}</option>`).join("");
+}
+
+/* ---------- ルーティング ---------- */
+const VIEWS = ["summary","timeline","cloze","qa"];
+function route(){
+  const h = location.hash.slice(1);
+  let v = VIEWS.includes(h) ? h : (h.startsWith("ch-") ? "summary" : "summary");
+  document.querySelectorAll(".view").forEach(el=>el.classList.toggle("on", el.id==="v-"+v));
+  document.querySelectorAll("nav.tabs a").forEach(a=>{
+    if(a.getAttribute("href")==="#"+v) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current");
+  });
+  if(h.startsWith("ch-")){const t=document.getElementById(h); if(t) t.scrollIntoView();}
+  else window.scrollTo(0,0);
+}
+window.addEventListener("hashchange",route);
+
+/* ---------- 赤シート ---------- */
+const sheetBtn = $("#sheetBtn");
+function setSheet(on){
+  document.body.classList.toggle("sheet",on);
+  sheetBtn.setAttribute("aria-pressed",on);
+  document.querySelectorAll("mark.open").forEach(m=>m.classList.remove("open"));
+  store.set("python-sheet",on);
+}
+sheetBtn.addEventListener("click",()=>setSheet(!document.body.classList.contains("sheet")));
+document.addEventListener("click",e=>{
+  const m = e.target.closest("mark");
+  if(m && document.body.classList.contains("sheet")) m.classList.toggle("open");
+});
+
+/* ---------- 年表 ---------- */
+let tlReg = "all";
+function renderTL(){
+  const f = $("#tlFilters");
+  f.innerHTML = [["all","すべて"],...Object.keys(REG).map(r=>[r,r])]
+    .map(([k,l])=>`<button class="chip" data-r="${k}" aria-pressed="${k===tlReg}">${l}</button>`).join("");
+  $("#tl").innerHTML = TL.filter(e=>tlReg==="all"||e[1]===tlReg).map(([y,r,t,d,big])=>
+    `<li class="${big?"big":""}" style="--c:${REG[r]}"><span class="y">${y}</span>
+     <div class="ev"><span class="tag">${r}</span><b>${t}</b>${d?`<small>${d}</small>`:""}</div></li>`).join("");
+}
+$("#tlFilters").addEventListener("click",e=>{const b=e.target.closest(".chip"); if(b){tlReg=b.dataset.r; renderTL();}});
+
+/* ---------- 穴埋め ---------- */
+let clozeOrder = CLOZE.map((_,i)=>i);
+function renderCloze(){
+  const ch = $("#clozeCh").value;
+  $("#clozeList").innerHTML = clozeOrder.map(i=>CLOZE[i]).filter(c=>ch==="all"||c[0]===ch).map(([c,s])=>{
+    const html = esc(s).replace(/\[([^\]]+)\]/g,(_,a)=>`<button class="blank" aria-label="答えを見る">${a}</button>`);
+    return `<li><span class="chlabel">${CH[c]}</span>${html}</li>`;
+  }).join("");
+}
+$("#clozeList").addEventListener("click",e=>{
+  const b=e.target.closest(".blank"); if(!b) return;
+  b.classList.toggle("open"); b.setAttribute("aria-label", b.classList.contains("open")?"答えを隠す":"答えを見る");
+});
+$("#clozeCh").addEventListener("change",renderCloze);
+$("#clozeShow").addEventListener("click",()=>document.querySelectorAll(".blank").forEach(b=>b.classList.add("open")));
+$("#clozeHide").addEventListener("click",()=>document.querySelectorAll(".blank").forEach(b=>b.classList.remove("open")));
+$("#clozeShuffle").addEventListener("click",()=>{clozeOrder=shuffle(clozeOrder); renderCloze();});
+
+/* ---------- 一問一答 ---------- */
+let known = new Set(store.get("python-known",[]));
+let deck = [], pos = 0, revealed = false;
+function pool(){
+  const ch=$("#qaCh").value, mode=$("#qaMode").value;
+  return QA.map((q,i)=>i).filter(i=>(ch==="all"||QA[i][0]===ch)&&(mode==="all"||!known.has(i)));
+}
+function newDeck(){deck=shuffle(pool()); pos=0; revealed=false; renderQA();}
+function renderQA(){
+  const ch=$("#qaCh").value;
+  const total = QA.filter(q=>ch==="all"||q[0]===ch).length;
+  const done = QA.filter((q,i)=>(ch==="all"||q[0]===ch)&&known.has(i)).length;
+  $("#qaBar").style.width = total? (done/total*100)+"%" : "0";
+  $("#qaStat").textContent = `覚えた問題 ${done} / ${total}`;
+  const box=$("#qaBox");
+  if(pos>=deck.length){
+    box.innerHTML = `<div class="card"><div class="empty">${deck.length? "このセットは終わりです。":"この範囲はすべて覚えました。"}<br><br>
+      <button class="btn main" id="qaAgain">${deck.length?"もう一周する":"すべての問題で復習する"}</button></div></div>`;
+    $("#qaAgain").onclick=()=>{ if(!deck.length) $("#qaMode").value="all"; newDeck(); };
+    return;
+  }
+  const i=deck[pos], [c,q,a,note]=QA[i];
+  box.innerHTML = `<div class="card">
+    <div class="meta"><span>${CH[c]}</span><span>${pos+1} / ${deck.length}</span></div>
+    <div class="qq">${esc(q)}</div>
+    <div class="ans" aria-live="polite">${revealed? esc(a)+(note?`<small>${esc(note)}</small>`:""):""}</div>
+    <div class="row">${revealed
+      ? `<button class="btn" id="qaNo">もう一回</button><button class="btn main" id="qaYes">覚えた</button>`
+      : `<button class="btn main" id="qaShow">答えを見る</button>`}</div></div>`;
+  if(revealed){
+    $("#qaYes").onclick=()=>{known.add(i); store.set("python-known",[...known]); pos++; revealed=false; renderQA();};
+    $("#qaNo").onclick=()=>{deck.push(i); pos++; revealed=false; renderQA();};
+  } else $("#qaShow").onclick=()=>{revealed=true; renderQA();};
+}
+$("#qaCh").addEventListener("change",newDeck);
+$("#qaMode").addEventListener("change",newDeck);
+$("#qaReset").addEventListener("click",()=>{ if(confirm("「覚えた」の記録をすべて消しますか？")){known=new Set(); store.set("python-known",[]); newDeck();} });
+
+/* ---------- 初期化 ---------- */
+chOptions($("#clozeCh")); chOptions($("#qaCh"));
+renderTL(); renderCloze(); newDeck();
+if(store.get("python-sheet",false)) setSheet(true);
+route();
+</script>
+<script>
+/* ---------- 出力予想 ---------- */
+(function(){
+  const box = document.getElementById("predict");
+  box.innerHTML = PREDICT.map(([t,c,o,e],i)=>`<div class="pcard"><h3>問${i+1}　${esc(t)}</h3>
+    <span class="lbl">コード</span><pre class="code">${esc(c)}</pre>
+    <button class="btn main" data-p="${i}" aria-expanded="false">答えを見る</button>
+    <div class="ans" id="pa${i}" hidden><span class="lbl">出力</span><pre class="code out">${esc(o)}</pre><p class="exp">${esc(e)}</p></div></div>`).join("");
+  function set(btn,open){
+    const a=document.getElementById("pa"+btn.dataset.p);
+    a.hidden=!open; btn.textContent=open?"答えを隠す":"答えを見る"; btn.setAttribute("aria-expanded",open);
+  }
+  box.addEventListener("click",e=>{const b=e.target.closest("button[data-p]"); if(b) set(b,b.getAttribute("aria-expanded")!=="true");});
+  document.getElementById("pShow").onclick=()=>box.querySelectorAll("button[data-p]").forEach(b=>set(b,true));
+  document.getElementById("pHide").onclick=()=>box.querySelectorAll("button[data-p]").forEach(b=>set(b,false));
+})();
+</script>
+</body>
+</html>
