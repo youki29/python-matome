@@ -380,6 +380,7 @@ print("後攻は", kg, "回PKに成功しました")</pre>
       <button class="btn" id="clozeShow">全部見る</button>
       <button class="btn" id="clozeHide">全部隠す</button>
       <button class="btn" id="clozeShuffle">シャッフル</button>
+      <button class="btn" id="clozeReset">元の順に戻す</button>
     </div>
     <ol class="cloze" id="clozeList"></ol>
   </div>
@@ -561,6 +562,7 @@ $("#clozeCh").addEventListener("change",renderCloze);
 $("#clozeShow").addEventListener("click",()=>document.querySelectorAll(".blank").forEach(b=>b.classList.add("open")));
 $("#clozeHide").addEventListener("click",()=>document.querySelectorAll(".blank").forEach(b=>b.classList.remove("open")));
 $("#clozeShuffle").addEventListener("click",()=>{clozeOrder=shuffle(clozeOrder); renderCloze();});
+$("#clozeReset").addEventListener("click",()=>{clozeOrder=CLOZE.map((_,i)=>i); renderCloze();});
 
 /* ---------- 一問一答 ---------- */
 let known = new Set(store.get("python-known",[]));
